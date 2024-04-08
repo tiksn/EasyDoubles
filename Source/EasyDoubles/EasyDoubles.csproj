@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Build">
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <Product>EasyDoubles</Product>
+    <Description>EasyDoubles - Test Doubles Framework</Description>
+    <PackageTags>EasyDoubles;TestDoubles;TestRepository</PackageTags>
+  </PropertyGroup>
+
+</Project>
