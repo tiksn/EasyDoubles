@@ -22,6 +22,8 @@ trim_trailing_whitespace = true
 ##########################################
 # File Extension Settings
 ##########################################
+vsspell_section_id = 03b112a22aa0408db9434664c1f63c17
+vsspell_ignored_keywords_03b112a22aa0408db9434664c1f63c17 = Metadata
 
 # Visual Studio Solution Files
 [*.sln]
