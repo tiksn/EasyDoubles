@@ -6,6 +6,42 @@ using Xunit;
 public class EasyStoresTest
 {
     [Fact]
+    public void GivenStores_WhenBucketResolvedDifferent_ThenTheyShouldNotBeTheSameObject()
+    {
+        // Arrange
+        var stores = new EasyStores();
+
+        // Act
+        var easyFileBucket1 = stores.ResolveBucket<int, string>("videos");
+        var easyFileBucket2 = stores.ResolveBucket<int, string>("photos");
+
+        // Assert
+        Assert.NotNull(easyFileBucket1);
+        Assert.NotNull(easyFileBucket2);
+        Assert.NotSame(easyFileBucket1, easyFileBucket2);
+        Assert.NotSame(easyFileBucket1.BucketContent, easyFileBucket2.BucketContent);
+        Assert.NotSame(easyFileBucket1.BucketName, easyFileBucket2.BucketName);
+    }
+
+    [Fact]
+    public void GivenStores_WhenBucketResolvedTwice_ThenTheyShouldBeTheSameObject()
+    {
+        // Arrange
+        var stores = new EasyStores();
+
+        // Act
+        var easyFileBucket1 = stores.ResolveBucket<int, string>("videos");
+        var easyFileBucket2 = stores.ResolveBucket<int, string>("videos");
+
+        // Assert
+        Assert.NotNull(easyFileBucket1);
+        Assert.NotNull(easyFileBucket2);
+        Assert.Same(easyFileBucket1, easyFileBucket2);
+        Assert.Same(easyFileBucket1.BucketContent, easyFileBucket2.BucketContent);
+        Assert.Same(easyFileBucket1.BucketName, easyFileBucket2.BucketName);
+    }
+
+    [Fact]
     public void GivenStores_WhenStoreResolvedDifferent_ThenTheyShouldNotBeTheSameObject()
     {
         // Arrange
