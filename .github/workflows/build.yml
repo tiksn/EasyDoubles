@@ -53,13 +53,9 @@ jobs:
           name: ${{matrix.os}}
           path: "./Artefacts"
 
-  push-github-packages:
-    name: "Push GitHub Packages"
+  generate-code-coverage-report:
+    name: "Generate Code Coverage Report"
     needs: build
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
-    environment:
-      name: "GitHub Packages"
-      url: https://github.com/tiksn/EasyDoubles/packages
     permissions:
       packages: write
     runs-on: windows-latest
@@ -74,6 +70,39 @@ jobs:
       - name: "Dotnet NuGet Push"
         run: dotnet nuget push .\*.nupkg --api-key ${{ github.token }} --source GitHub --skip-duplicate
         shell: pwsh
+  push-github-packages:
+    name: "Push GitHub Packages"
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    environment:
+      name: "GitHub Packages"
+      url: https://github.com/tiksn/EasyDoubles/packages
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Download Artefact"
+        uses: actions/download-artifact@v4.1.5
+        with:
+          name: "windows-latest"
+      - name: Code Coverage Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: Artefacts/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: true
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '20 80'
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-results.md
 
   push-nuget:
     name: "Push NuGet Packages"
