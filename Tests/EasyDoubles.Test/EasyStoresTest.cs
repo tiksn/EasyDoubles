@@ -42,6 +42,19 @@ public class EasyStoresTest
     }
 
     [Fact]
+    public void GivenStores_WhenResolvingEmptyNamedBucket_ThenExceptionShowBeThrown()
+    {
+        // Arrange
+        var stores = new EasyStores();
+
+        // Act
+        IEasyFileBucket<int, string> ResolveBucket() => stores.ResolveBucket<int, string>(string.Empty);
+
+        // Assert
+        _ = Assert.Throws<ArgumentException>(ResolveBucket);
+    }
+
+    [Fact]
     public void GivenStores_WhenStoreResolvedDifferent_ThenTheyShouldNotBeTheSameObject()
     {
         // Arrange
