@@ -1,0 +1,16 @@
+namespace EasyDoubles.Test.Repositories;
+
+using EasyDoubles.Test.Entities;
+using EasyDoubles.Test.Entities.Configurations;
+using TIKSN.Data.EntityFrameworkCore;
+
+public class EntityCatalogTypeRepository :
+    EntityQueryRepository<CatalogContext, CatalogType, int>,
+    ICatalogTypeRepository,
+    ICatalogTypeQueryRepository
+{
+    public EntityCatalogTypeRepository(CatalogContext dbContext)
+        : base(dbContext)
+    {
+    }
+}
