@@ -13,5 +13,10 @@ public class CommonModule : Module
             .RegisterType<CatalogInitializer>()
             .As<ICatalogInitializer>()
             .InstancePerLifetimeScope();
+
+        _ = builder
+            .RegisterInstance(new Random(1515643399))
+            .As<Random>()
+            .SingleInstance();
     }
 }
