@@ -120,7 +120,7 @@ public sealed class MultiDatabaseTester
 
             var properties = typeof(TEntity).GetProperties().ToList();
             properties = properties.Where(x =>
-                properties.Exists(y => string.Equals(x.Name, $"{y.Name}Id", StringComparison.Ordinal))).ToList();
+                !properties.Exists(y => string.Equals(y.Name, $"{x.Name}Id", StringComparison.Ordinal))).ToList();
             foreach (var property in properties)
             {
                 var easyStoreEntityValue = property.GetValue(easyStoreEntity, index: null);
