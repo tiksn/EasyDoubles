@@ -13,11 +13,17 @@ using Microsoft.Extensions.DependencyInjection;
 using TIKSN.Data;
 using TIKSN.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 public sealed class MultiDatabaseTester
 {
+    private readonly ITestOutputHelper testOutputHelper;
+
     private readonly (IServiceProvider Easy, IServiceProvider Sqlite) providers
         = (BuildEasyServiceProvider(), BuildSqliteServiceProvider());
+
+    public MultiDatabaseTester(ITestOutputHelper testOutputHelper)
+        => this.testOutputHelper = testOutputHelper ?? throw new ArgumentNullException(nameof(testOutputHelper));
 
     public async Task AssertAllAsync(CancellationToken cancellationToken)
     {
@@ -115,10 +121,13 @@ public sealed class MultiDatabaseTester
 
         foreach (var id in allIds)
         {
+            var entityType = typeof(TEntity);
+            this.testOutputHelper.WriteLine($"Asserting '{entityType.Name}' [ID {id}]");
+
             var easyStoreEntity = easyStoreEntities.Single(x => x.ID.Equals(id));
             var dbSetEntity = dbSetEntities.Single(x => x.ID.Equals(id));
 
-            var properties = typeof(TEntity).GetProperties().ToList();
+            var properties = entityType.GetProperties().ToList();
             properties = properties.Where(x =>
                 !properties.Exists(y => string.Equals(y.Name, $"{x.Name}Id", StringComparison.Ordinal))).ToList();
             foreach (var property in properties)
