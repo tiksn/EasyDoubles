@@ -380,6 +380,46 @@ public class EasyRepositoryTest
     }
 
     [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionExistingRetrievedByIdOrDefault_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetOrDefaultAsync(100001, default).ConfigureAwait(false);
+                Assert.NotNull(itemEntity);
+                Assert.Equal(100001, itemEntity.ID);
+                Assert.Equal(10001, itemEntity.CatalogTypeId);
+                Assert.Equal(1001, itemEntity.CatalogBrandId);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetOrDefaultAsync(10001, default).ConfigureAwait(false);
+                Assert.NotNull(typeEntity);
+                Assert.Equal(10001, typeEntity.ID);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetOrDefaultAsync(1001, default).ConfigureAwait(false);
+                Assert.NotNull(brandEntity);
+                Assert.Equal(1001, brandEntity.ID);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
     public async Task GivenInitializedDatabases_WhenPerCollectionExistingEntityExistsChecked_ThenItShouldBeTrue()
     {
         // Arrange
