@@ -488,4 +488,39 @@ public class EasyRepositoryTest
         // Assert
         await tester.AssertAllAsync(default);
     }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMissingEntityExistsChecked_ThenItShouldBeFalse()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntityExists = await provider.GetRequiredService<ICatalogItemQueryRepository>().ExistsAsync(100101, default).ConfigureAwait(false);
+                Assert.False(itemEntityExists);
+
+                var typeEntityExists = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ExistsAsync(10101, default).ConfigureAwait(false);
+                Assert.False(typeEntityExists);
+
+                var brandEntityExists = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ExistsAsync(1101, default).ConfigureAwait(false);
+                Assert.False(brandEntityExists);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
 }
