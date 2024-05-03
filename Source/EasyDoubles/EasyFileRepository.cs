@@ -44,6 +44,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         TIdentity id,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (this.easyFileBucket.BucketContent.TryRemove(id, out var content))
         {
             await content.Content.DisposeAsync().ConfigureAwait(false);
@@ -66,6 +68,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         TIdentity id,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (this.easyFileBucket.BucketContent.TryGetValue(id, out var content))
         {
             _ = content.Content.Seek(0, SeekOrigin.Begin);
@@ -83,6 +87,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         TIdentity id,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (this.easyFileBucket.BucketContent.TryGetValue(id, out var content))
         {
             var fileInfo = new FileInfo<TIdentity, TMetadata>(id, content.Path, content.Metadata);
@@ -97,6 +103,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         TIdentity id,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (this.easyFileBucket.BucketContent.TryGetValue(id, out var content))
         {
             _ = content.Content.Seek(0, SeekOrigin.Begin);
@@ -114,6 +122,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         string path,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var exists = this.QueryByPath(
             path,
             () => false,
@@ -126,7 +136,11 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
     public Task<bool> ExistsByIdAsync(
         TIdentity id,
         CancellationToken cancellationToken)
-        => Task.FromResult(this.easyFileBucket.BucketContent.TryGetValue(id, out _));
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return Task.FromResult(this.easyFileBucket.BucketContent.TryGetValue(id, out _));
+    }
 
     /// <inheritdoc />
     public Task UploadAsync(
@@ -147,6 +161,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         TMetadata metadata,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
 #pragma warning disable MA0106 // Avoid closure by using an overload with the 'factoryArgument' parameter
         var bucketEntry = this.easyFileBucket.BucketContent.AddOrUpdate(
             id,
@@ -170,6 +186,8 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
         byte[] content,
         CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
 #pragma warning disable MA0106 // Avoid closure by using an overload with the 'factoryArgument' parameter
 #pragma warning disable CS8604 // Possible null reference argument.
         var bucketEntry = this.easyFileBucket.BucketContent.AddOrUpdate(

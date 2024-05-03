@@ -67,4 +67,460 @@ public class EasyRepositoryTest
         // Assert
         await tester.AssertAllAsync(default);
     }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMultipleEntitiesCreated_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task CreateMultipleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var type101Entity = new CatalogType()
+                {
+                    ID = 10101,
+                    Type = "Footwear",
+                };
+                var type102Entity = new CatalogType()
+                {
+                    ID = 10102,
+                    Type = "Climbing",
+                };
+                await provider.GetRequiredService<ICatalogTypeRepository>().AddRangeAsync([type101Entity, type102Entity], default).ConfigureAwait(false);
+
+                var brand101Entity = new CatalogBrand()
+                {
+                    ID = 1101,
+                    Brand = "Daybird",
+                };
+                var brand102Entity = new CatalogBrand()
+                {
+                    ID = 1102,
+                    Brand = "Gravitator",
+                };
+                await provider.GetRequiredService<ICatalogBrandRepository>().AddRangeAsync([brand101Entity, brand102Entity], default).ConfigureAwait(false);
+
+                var item101Entity = new CatalogItem()
+                {
+                    ID = 100101,
+                    CatalogType = type101Entity,
+                    CatalogTypeId = type101Entity.ID,
+                    CatalogBrand = brand101Entity,
+                    CatalogBrandId = brand101Entity.ID,
+                    Name = "Wanderer Black Hiking Boots",
+                    Description = "Daybird's Wanderer Hiking Boots in sleek black are perfect for all your outdoor adventures. These boots are made with a waterproof leather upper and a durable rubber sole for superior traction. With their cushioned insole and padded collar, these boots will keep you comfortable all day long.",
+                    Price = 109.99m,
+                };
+                var item102Entity = new CatalogItem()
+                {
+                    ID = 100102,
+                    CatalogType = type102Entity,
+                    CatalogTypeId = type102Entity.ID,
+                    CatalogBrand = brand102Entity,
+                    CatalogBrandId = brand102Entity.ID,
+                    Name = "Summit Pro Harness",
+                    Description = "Conquer new heights with the Summit Pro Harness by Gravitator. This lightweight and durable climbing harness features adjustable leg loops and waist belt for a customized fit. With its vibrant blue color, you'll look stylish while maneuvering difficult routes. Safety is a top priority with a reinforced tie-in point and strong webbing loops.",
+                    Price = 89.99m,
+                };
+                await provider.GetRequiredService<ICatalogItemRepository>().AddRangeAsync([item101Entity, item102Entity], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(CreateMultipleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionSingleEntitiesUpdated_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task UpdateSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var typeEntity = new CatalogType()
+                {
+                    ID = 10001,
+                    Type = "Footwear",
+                };
+                await provider.GetRequiredService<ICatalogTypeRepository>().UpdateAsync(typeEntity, default).ConfigureAwait(false);
+
+                var brandEntity = new CatalogBrand()
+                {
+                    ID = 1001,
+                    Brand = "Daybird",
+                };
+                await provider.GetRequiredService<ICatalogBrandRepository>().UpdateAsync(brandEntity, default).ConfigureAwait(false);
+
+                var itemEntity = new CatalogItem()
+                {
+                    ID = 100001,
+                    CatalogType = typeEntity,
+                    CatalogTypeId = typeEntity.ID,
+                    CatalogBrand = brandEntity,
+                    CatalogBrandId = brandEntity.ID,
+                    Name = "Wanderer Black Hiking Boots",
+                    Description = "Daybird's Wanderer Hiking Boots in sleek black are perfect for all your outdoor adventures. These boots are made with a waterproof leather upper and a durable rubber sole for superior traction. With their cushioned insole and padded collar, these boots will keep you comfortable all day long.",
+                    Price = 109.99m,
+                };
+                await provider.GetRequiredService<ICatalogItemRepository>().UpdateAsync(itemEntity, default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(UpdateSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMultipleEntitiesUpdated_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task UpdateMultipleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var type001Entity = new CatalogType()
+                {
+                    ID = 10001,
+                    Type = "Footwear",
+                };
+                var type002Entity = new CatalogType()
+                {
+                    ID = 10002,
+                    Type = "Climbing",
+                };
+                await provider.GetRequiredService<ICatalogTypeRepository>().UpdateRangeAsync([type001Entity, type002Entity], default).ConfigureAwait(false);
+
+                var brand001Entity = new CatalogBrand()
+                {
+                    ID = 1001,
+                    Brand = "Daybird",
+                };
+                var brand002Entity = new CatalogBrand()
+                {
+                    ID = 1002,
+                    Brand = "Gravitator",
+                };
+                await provider.GetRequiredService<ICatalogBrandRepository>().UpdateRangeAsync([brand001Entity, brand002Entity], default).ConfigureAwait(false);
+
+                var item001Entity = new CatalogItem()
+                {
+                    ID = 100001,
+                    CatalogType = type001Entity,
+                    CatalogTypeId = type001Entity.ID,
+                    CatalogBrand = brand001Entity,
+                    CatalogBrandId = brand001Entity.ID,
+                    Name = "Wanderer Black Hiking Boots",
+                    Description = "Daybird's Wanderer Hiking Boots in sleek black are perfect for all your outdoor adventures. These boots are made with a waterproof leather upper and a durable rubber sole for superior traction. With their cushioned insole and padded collar, these boots will keep you comfortable all day long.",
+                    Price = 109.99m,
+                };
+                var item002Entity = new CatalogItem()
+                {
+                    ID = 100002,
+                    CatalogType = type002Entity,
+                    CatalogTypeId = type002Entity.ID,
+                    CatalogBrand = brand002Entity,
+                    CatalogBrandId = brand002Entity.ID,
+                    Name = "Summit Pro Harness",
+                    Description = "Conquer new heights with the Summit Pro Harness by Gravitator. This lightweight and durable climbing harness features adjustable leg loops and waist belt for a customized fit. With its vibrant blue color, you'll look stylish while maneuvering difficult routes. Safety is a top priority with a reinforced tie-in point and strong webbing loops.",
+                    Price = 89.99m,
+                };
+                await provider.GetRequiredService<ICatalogItemRepository>().UpdateRangeAsync([item001Entity, item002Entity], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(UpdateMultipleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionSingleEntitiesDeleted_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task DeleteSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetAsync(100001, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogItemRepository>().RemoveAsync(itemEntity, default).ConfigureAwait(false);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetAsync(10001, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogTypeRepository>().RemoveAsync(typeEntity, default).ConfigureAwait(false);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetAsync(1001, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogBrandRepository>().RemoveAsync(brandEntity, default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(DeleteSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMultipleEntitiesDeleted_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task DeleteMultipleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var item001Entity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetAsync(100001, default).ConfigureAwait(false);
+                var item002Entity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetAsync(100002, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogItemRepository>().RemoveRangeAsync([item001Entity, item002Entity], default).ConfigureAwait(false);
+
+                var type001Entity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetAsync(10001, default).ConfigureAwait(false);
+                var type002Entity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetAsync(10002, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogTypeRepository>().RemoveRangeAsync([type001Entity, type002Entity], default).ConfigureAwait(false);
+
+                var brand001Entity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetAsync(1001, default).ConfigureAwait(false);
+                var brand002Entity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetAsync(1002, default).ConfigureAwait(false);
+                await provider.GetRequiredService<ICatalogBrandRepository>().RemoveRangeAsync([brand001Entity, brand002Entity], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(DeleteMultipleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionRetrievedById_ThenAllMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetAsync(100001, default).ConfigureAwait(false);
+                Assert.Equal(100001, itemEntity.ID);
+                Assert.Equal(10001, itemEntity.CatalogTypeId);
+                Assert.Equal(1001, itemEntity.CatalogBrandId);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetAsync(10001, default).ConfigureAwait(false);
+                Assert.Equal(10001, typeEntity.ID);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetAsync(1001, default).ConfigureAwait(false);
+                Assert.Equal(1001, brandEntity.ID);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionExistingRetrievedByIdOrDefault_ThenResultMatch()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetOrDefaultAsync(100001, default).ConfigureAwait(false);
+                Assert.NotNull(itemEntity);
+                Assert.Equal(100001, itemEntity.ID);
+                Assert.Equal(10001, itemEntity.CatalogTypeId);
+                Assert.Equal(1001, itemEntity.CatalogBrandId);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetOrDefaultAsync(10001, default).ConfigureAwait(false);
+                Assert.NotNull(typeEntity);
+                Assert.Equal(10001, typeEntity.ID);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetOrDefaultAsync(1001, default).ConfigureAwait(false);
+                Assert.NotNull(brandEntity);
+                Assert.Equal(1001, brandEntity.ID);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMissingRetrievedByIdOrDefault_ThenResultIsNull()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetOrDefaultAsync(100101, default).ConfigureAwait(false);
+                Assert.Null(itemEntity);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetOrDefaultAsync(10101, default).ConfigureAwait(false);
+                Assert.Null(typeEntity);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetOrDefaultAsync(1101, default).ConfigureAwait(false);
+                Assert.Null(brandEntity);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionExistingEntityExistsChecked_ThenItShouldBeTrue()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntityExists = await provider.GetRequiredService<ICatalogItemQueryRepository>().ExistsAsync(100001, default).ConfigureAwait(false);
+                Assert.True(itemEntityExists);
+
+                var typeEntityExists = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ExistsAsync(10001, default).ConfigureAwait(false);
+                Assert.True(typeEntityExists);
+
+                var brandEntityExists = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ExistsAsync(1001, default).ConfigureAwait(false);
+                Assert.True(brandEntityExists);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMissingEntityExistsChecked_ThenItShouldBeFalse()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntityExists = await provider.GetRequiredService<ICatalogItemQueryRepository>().ExistsAsync(100101, default).ConfigureAwait(false);
+                Assert.False(itemEntityExists);
+
+                var typeEntityExists = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ExistsAsync(10101, default).ConfigureAwait(false);
+                Assert.False(typeEntityExists);
+
+                var brandEntityExists = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ExistsAsync(1101, default).ConfigureAwait(false);
+                Assert.False(brandEntityExists);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
 }

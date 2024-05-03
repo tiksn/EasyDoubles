@@ -26,8 +26,6 @@ public class CatalogInitializer : ICatalogInitializer
 
     private static async Task InitializeAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken)
     {
-        var random = serviceProvider.GetRequiredService<Random>();
-
         var catalogBrands = await CreateEntitiesAsync(
             serviceProvider.GetRequiredService<ICatalogBrandRepository>(),
             CreateCatalogBrand,
@@ -40,10 +38,10 @@ public class CatalogInitializer : ICatalogInitializer
 
         _ = await CreateEntitiesAsync(
             serviceProvider.GetRequiredService<ICatalogItemRepository>(),
-            x => CreateCatalogItem(
-                x,
-                catalogBrands[random.Next(catalogBrands.Length)],
-                catalogTypes[random.Next(catalogTypes.Length)]),
+            number => CreateCatalogItem(
+                number,
+                catalogBrands[(number - 1) % catalogBrands.Length],
+                catalogTypes[(number - 1) % catalogTypes.Length]),
             cancellationToken).ConfigureAwait(false);
     }
 
