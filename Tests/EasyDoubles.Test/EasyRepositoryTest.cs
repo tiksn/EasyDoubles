@@ -343,7 +343,7 @@ public class EasyRepositoryTest
     }
 
     [Fact]
-    public async Task GivenInitializedDatabases_WhenPerCollectionSingleEntitiesRetrievedById_ThenAllMatch()
+    public async Task GivenInitializedDatabases_WhenPerCollectionRetrievedById_ThenAllMatch()
     {
         // Arrange
         var tester = new MultiDatabaseTester(this.testOutputHelper);
@@ -368,6 +368,41 @@ public class EasyRepositoryTest
 
                 var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetAsync(1001, default).ConfigureAwait(false);
                 Assert.Equal(1001, brandEntity.ID);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionExistingEntityExistsChecked_ThenItShouldBeTrue()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntityExists = await provider.GetRequiredService<ICatalogItemQueryRepository>().ExistsAsync(100001, default).ConfigureAwait(false);
+                Assert.True(itemEntityExists);
+
+                var typeEntityExists = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ExistsAsync(10001, default).ConfigureAwait(false);
+                Assert.True(typeEntityExists);
+
+                var brandEntityExists = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ExistsAsync(1001, default).ConfigureAwait(false);
+                Assert.True(brandEntityExists);
 
                 await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
             }
