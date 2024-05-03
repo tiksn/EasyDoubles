@@ -380,7 +380,7 @@ public class EasyRepositoryTest
     }
 
     [Fact]
-    public async Task GivenInitializedDatabases_WhenPerCollectionExistingRetrievedByIdOrDefault_ThenAllMatch()
+    public async Task GivenInitializedDatabases_WhenPerCollectionExistingRetrievedByIdOrDefault_ThenResultMatch()
     {
         // Arrange
         var tester = new MultiDatabaseTester(this.testOutputHelper);
@@ -408,6 +408,41 @@ public class EasyRepositoryTest
                 var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetOrDefaultAsync(1001, default).ConfigureAwait(false);
                 Assert.NotNull(brandEntity);
                 Assert.Equal(1001, brandEntity.ID);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+            }
+        }
+
+        await tester.ForEachAsync(GetByIdSingleEntitiesAsync);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionMissingRetrievedByIdOrDefault_ThenResultIsNull()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task GetByIdSingleEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntity = await provider.GetRequiredService<ICatalogItemQueryRepository>().GetOrDefaultAsync(100101, default).ConfigureAwait(false);
+                Assert.Null(itemEntity);
+
+                var typeEntity = await provider.GetRequiredService<ICatalogTypeQueryRepository>().GetOrDefaultAsync(10101, default).ConfigureAwait(false);
+                Assert.Null(typeEntity);
+
+                var brandEntity = await provider.GetRequiredService<ICatalogBrandQueryRepository>().GetOrDefaultAsync(1101, default).ConfigureAwait(false);
+                Assert.Null(brandEntity);
 
                 await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
             }
