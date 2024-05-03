@@ -27,9 +27,26 @@ public sealed class MultiDatabaseTester
 
     public async Task AssertAllAsync(CancellationToken cancellationToken)
     {
-        await this.AssertForEntityAsync<CatalogBrand, int>(cancellationToken).ConfigureAwait(false);
-        await this.AssertForEntityAsync<CatalogType, int>(cancellationToken).ConfigureAwait(false);
-        await this.AssertForEntityAsync<CatalogItem, int>(cancellationToken).ConfigureAwait(false);
+        var easyScope = this.providers.Easy.CreateAsyncScope();
+        await using (easyScope.ConfigureAwait(false))
+        {
+            var sqliteScope = this.providers.Sqlite.CreateAsyncScope();
+            await using (sqliteScope.ConfigureAwait(false))
+            {
+                await this.AssertForEntityAsync<CatalogBrand, int>(
+                    easyScope.ServiceProvider,
+                    sqliteScope.ServiceProvider,
+                    cancellationToken).ConfigureAwait(false);
+                await this.AssertForEntityAsync<CatalogType, int>(
+                    easyScope.ServiceProvider,
+                    sqliteScope.ServiceProvider,
+                    cancellationToken).ConfigureAwait(false);
+                await this.AssertForEntityAsync<CatalogItem, int>(
+                    easyScope.ServiceProvider,
+                    sqliteScope.ServiceProvider,
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -90,12 +107,14 @@ public sealed class MultiDatabaseTester
     }
 
     private async Task AssertForEntityAsync<TEntity, TIdentity>(
+        IServiceProvider easyServiceProvider,
+        IServiceProvider sqliteServiceProvider,
         CancellationToken cancellationToken)
         where TEntity : class, IEntity<TIdentity>
         where TIdentity : IEquatable<TIdentity>
     {
-        var easyStores = this.providers.Easy.GetRequiredService<IEasyStores>();
-        var catalogContext = this.providers.Sqlite.GetRequiredService<CatalogContext>();
+        var easyStores = easyServiceProvider.GetRequiredService<IEasyStores>();
+        var catalogContext = sqliteServiceProvider.GetRequiredService<CatalogContext>();
 
         var easyStore = easyStores.Resolve<TEntity, TIdentity>();
         var dbSet = catalogContext.Set<TEntity>();
