@@ -1,5 +1,8 @@
 namespace EasyDoubles.Test;
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using EasyDoubles.Test.Entities;
 using EasyDoubles.Test.Repositories;
 using EasyDoubles.Test.Services;
@@ -522,5 +525,131 @@ public class EasyRepositoryTest
 
         // Assert
         await tester.AssertAllAsync(default);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionAllExistingEntitiesListed_ThenListShouldHaveRequestedNumberOfItems()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task<IReadOnlyList<CatalogItem>> ListItemEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntities = await provider.GetRequiredService<ICatalogItemQueryRepository>().ListAsync([100001, 100002, 100003], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return itemEntities;
+            }
+        }
+
+        static async Task<IReadOnlyList<CatalogType>> ListTypeEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var typeEntities = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ListAsync([10001, 10002, 10003], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return typeEntities;
+            }
+        }
+
+        static async Task<IReadOnlyList<CatalogBrand>> ListBrandEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var brandEntities = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ListAsync([1001, 1002, 1003], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return brandEntities;
+            }
+        }
+
+        var itemEntities = await tester.ForEachAsync<IReadOnlyList<CatalogItem>, CatalogItem, int>(ListItemEntitiesAsync, x => x);
+        var typeEntities = await tester.ForEachAsync<IReadOnlyList<CatalogType>, CatalogType, int>(ListTypeEntitiesAsync, x => x);
+        var brandEntities = await tester.ForEachAsync<IReadOnlyList<CatalogBrand>, CatalogBrand, int>(ListBrandEntitiesAsync, x => x);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+        Assert.Equal(3, itemEntities.Count);
+        Assert.Equal(3, typeEntities.Count);
+        Assert.Equal(3, brandEntities.Count);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionSomeExistingEntitiesListed_ThenListShouldBeLessThanRequestedNumberOfItems()
+    {
+        // Arrange
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        static async Task<IReadOnlyList<CatalogItem>> ListItemEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntities = await provider.GetRequiredService<ICatalogItemQueryRepository>().ListAsync([100001, 100002, 100003, 100099], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return itemEntities;
+            }
+        }
+
+        static async Task<IReadOnlyList<CatalogType>> ListTypeEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var typeEntities = await provider.GetRequiredService<ICatalogTypeQueryRepository>().ListAsync([10001, 10002, 10003, 10099], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return typeEntities;
+            }
+        }
+
+        static async Task<IReadOnlyList<CatalogBrand>> ListBrandEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var brandEntities = await provider.GetRequiredService<ICatalogBrandQueryRepository>().ListAsync([1001, 1002, 1003, 1099], default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return brandEntities;
+            }
+        }
+
+        var itemEntities = await tester.ForEachAsync<IReadOnlyList<CatalogItem>, CatalogItem, int>(ListItemEntitiesAsync, x => x);
+        var typeEntities = await tester.ForEachAsync<IReadOnlyList<CatalogType>, CatalogType, int>(ListTypeEntitiesAsync, x => x);
+        var brandEntities = await tester.ForEachAsync<IReadOnlyList<CatalogBrand>, CatalogBrand, int>(ListBrandEntitiesAsync, x => x);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+        Assert.Equal(3, itemEntities.Count);
+        Assert.Equal(3, typeEntities.Count);
+        Assert.Equal(3, brandEntities.Count);
     }
 }
