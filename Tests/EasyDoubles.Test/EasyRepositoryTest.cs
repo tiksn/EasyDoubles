@@ -652,4 +652,144 @@ public class EasyRepositoryTest
         Assert.Equal(3, typeEntities.Count);
         Assert.Equal(3, brandEntities.Count);
     }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionFirstPageRequested_ThenItemsShouldHaveRequestedNumberOfItems()
+    {
+        // Arrange
+        var firstPage = new Page(1, 3);
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        async Task<PageResult<CatalogItem>> PageItemEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntities = await provider.GetRequiredService<ICatalogItemQueryRepository>().PageAsync(new PageQuery(firstPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return itemEntities;
+            }
+        }
+
+        async Task<PageResult<CatalogType>> PageTypeEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var typeEntities = await provider.GetRequiredService<ICatalogTypeQueryRepository>().PageAsync(new PageQuery(firstPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return typeEntities;
+            }
+        }
+
+        async Task<PageResult<CatalogBrand>> PageBrandEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var brandEntities = await provider.GetRequiredService<ICatalogBrandQueryRepository>().PageAsync(new PageQuery(firstPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return brandEntities;
+            }
+        }
+
+        var itemEntities = await tester.ForEachAsync<PageResult<CatalogItem>, CatalogItem, int>(PageItemEntitiesAsync, x => x.Items);
+        var typeEntities = await tester.ForEachAsync<PageResult<CatalogType>, CatalogType, int>(PageTypeEntitiesAsync, x => x.Items);
+        var brandEntities = await tester.ForEachAsync<PageResult<CatalogBrand>, CatalogBrand, int>(PageBrandEntitiesAsync, x => x.Items);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+        Assert.Equal(3, itemEntities.Items.Count);
+        Assert.Equal(10, itemEntities.TotalItems);
+        Assert.Equal(4, itemEntities.TotalPages);
+        Assert.Equal(3, typeEntities.Items.Count);
+        Assert.Equal(10, typeEntities.TotalItems);
+        Assert.Equal(4, typeEntities.TotalPages);
+        Assert.Equal(3, brandEntities.Items.Count);
+        Assert.Equal(10, brandEntities.TotalItems);
+        Assert.Equal(4, brandEntities.TotalPages);
+    }
+
+    [Fact]
+    public async Task GivenInitializedDatabases_WhenPerCollectionLastPageRequested_ThenItemsShouldHaveLastItems()
+    {
+        // Arrange
+        var lastPage = new Page(4, 3);
+        var tester = new MultiDatabaseTester(this.testOutputHelper);
+        await tester.InitializeAsync(default);
+        await tester.ForEachAsync(provider =>
+            provider.GetRequiredService<ICatalogInitializer>().InitializeAsync(default));
+
+        // Act
+        async Task<PageResult<CatalogItem>> PageItemEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var itemEntities = await provider.GetRequiredService<ICatalogItemQueryRepository>().PageAsync(new PageQuery(lastPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return itemEntities;
+            }
+        }
+
+        async Task<PageResult<CatalogType>> PageTypeEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var typeEntities = await provider.GetRequiredService<ICatalogTypeQueryRepository>().PageAsync(new PageQuery(lastPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return typeEntities;
+            }
+        }
+
+        async Task<PageResult<CatalogBrand>> PageBrandEntitiesAsync(IServiceProvider provider)
+        {
+            var unitOfWorkFactory = provider.GetRequiredService<IUnitOfWorkFactory>();
+            var unitOfWork = await unitOfWorkFactory.CreateAsync(default).ConfigureAwait(false);
+            await using (unitOfWork.ConfigureAwait(false))
+            {
+                var brandEntities = await provider.GetRequiredService<ICatalogBrandQueryRepository>().PageAsync(new PageQuery(lastPage, estimateTotalItems: true), default).ConfigureAwait(false);
+
+                await unitOfWork.CompleteAsync(default).ConfigureAwait(false);
+
+                return brandEntities;
+            }
+        }
+
+        var itemEntities = await tester.ForEachAsync<PageResult<CatalogItem>, CatalogItem, int>(PageItemEntitiesAsync, x => x.Items);
+        var typeEntities = await tester.ForEachAsync<PageResult<CatalogType>, CatalogType, int>(PageTypeEntitiesAsync, x => x.Items);
+        var brandEntities = await tester.ForEachAsync<PageResult<CatalogBrand>, CatalogBrand, int>(PageBrandEntitiesAsync, x => x.Items);
+
+        // Assert
+        await tester.AssertAllAsync(default);
+        Assert.Single(itemEntities.Items);
+        Assert.Equal(10, itemEntities.TotalItems);
+        Assert.Equal(4, itemEntities.TotalPages);
+        Assert.Single(typeEntities.Items);
+        Assert.Equal(10, typeEntities.TotalItems);
+        Assert.Equal(4, typeEntities.TotalPages);
+        Assert.Single(brandEntities.Items);
+        Assert.Equal(10, brandEntities.TotalItems);
+        Assert.Equal(4, brandEntities.TotalPages);
+    }
 }
