@@ -67,7 +67,7 @@ public sealed class MultiDatabaseTester
 
     public async Task<TResult> ForEachAsync<TResult, TEntity, TIdentity>(
         Func<IServiceProvider, Task<TResult>> body,
-        Func<TResult, IReadOnlyList<TEntity>> map)
+        Func<TResult, IReadOnlyCollection<TEntity>> map)
         where TEntity : class, IEntity<TIdentity>
         where TIdentity : IEquatable<TIdentity>
     {
@@ -131,8 +131,8 @@ public sealed class MultiDatabaseTester
     }
 
     private void AssertForEach<TEntity, TIdentity>(
-        IReadOnlyList<TEntity> easyStoreEntities,
-        IReadOnlyList<TEntity> dbSetEntities)
+        IReadOnlyCollection<TEntity> easyStoreEntities,
+        IReadOnlyCollection<TEntity> dbSetEntities)
         where TEntity : class, IEntity<TIdentity>
         where TIdentity : IEquatable<TIdentity>
     {

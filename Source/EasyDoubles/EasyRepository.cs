@@ -119,7 +119,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
         cancellationToken.ThrowIfCancellationRequested();
 
         return PaginationQueryableHelper.PageAsync(
-            this.easyStore.Entities.Values.AsQueryable(),
+            this.easyStore.Entities.Values.AsQueryable().OrderBy(x => x.ID),
             pageQuery,
             static (q, _) => Task.FromResult(q.ToList()),
             static (q, _) => Task.FromResult(q.LongCount()),
