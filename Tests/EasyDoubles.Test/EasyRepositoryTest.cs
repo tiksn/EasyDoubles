@@ -782,13 +782,13 @@ public class EasyRepositoryTest
 
         // Assert
         await tester.AssertAllAsync(default);
-        Assert.Single(itemEntities.Items);
+        _ = Assert.Single(itemEntities.Items);
         Assert.Equal(10, itemEntities.TotalItems);
         Assert.Equal(4, itemEntities.TotalPages);
-        Assert.Single(typeEntities.Items);
+        _ = Assert.Single(typeEntities.Items);
         Assert.Equal(10, typeEntities.TotalItems);
         Assert.Equal(4, typeEntities.TotalPages);
-        Assert.Single(brandEntities.Items);
+        _ = Assert.Single(brandEntities.Items);
         Assert.Equal(10, brandEntities.TotalItems);
         Assert.Equal(4, brandEntities.TotalPages);
     }
