@@ -139,7 +139,7 @@ public class EasyFileRepository<TIdentity, TMetadata> : IEasyFileRepository<TIde
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return Task.FromResult(this.easyFileBucket.BucketContent.TryGetValue(id, out _));
+        return Task.FromResult(this.easyFileBucket.BucketContent.ContainsKey(id));
     }
 
     /// <inheritdoc />
