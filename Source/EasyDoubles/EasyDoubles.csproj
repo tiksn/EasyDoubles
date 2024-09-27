@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="DotNext" Version="5.13.0" />
-    <PackageReference Include="TIKSN-Framework" Version="5.3.0" />
+    <PackageReference Include="TIKSN-Framework" Version="5.3.1" />
   </ItemGroup>
 
 </Project>
