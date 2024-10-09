@@ -11,21 +11,24 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     where TEntity : IEntity<TIdentity>
     where TIdentity : IEquatable<TIdentity>
 {
-    private readonly IEasyStore<TEntity, TIdentity> easyStore;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="EasyRepository{TEntity, TIdentity}"/> class.
     /// </summary>
     /// <param name="easyStores">Easy Test Double Stores.</param>
     public EasyRepository(IEasyStores easyStores)
-        => this.easyStore = easyStores?.Resolve<TEntity, TIdentity>() ?? throw new ArgumentNullException(nameof(easyStores));
+        => this.EasyStore = easyStores?.Resolve<TEntity, TIdentity>() ?? throw new ArgumentNullException(nameof(easyStores));
+
+    /// <summary>
+    /// Gets EasyStore of type <see cref="IEasyStore{TEntity, TIdentity}"/>.
+    /// </summary>
+    protected IEasyStore<TEntity, TIdentity> EasyStore { get; }
 
     /// <inheritdoc/>
     public Task AddAsync(TEntity entity, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var added = this.easyStore.Entities.TryAdd(entity.ID, entity);
+        var added = this.EasyStore.Entities.TryAdd(entity.ID, entity);
 
         if (added)
         {
@@ -40,7 +43,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        _ = this.easyStore.Entities.AddOrUpdate(entity.ID, entity, (_, v) => v);
+        _ = this.EasyStore.Entities.AddOrUpdate(entity.ID, entity, (_, v) => v);
 
         return Task.CompletedTask;
     }
@@ -66,7 +69,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return Task.FromResult(this.easyStore.Entities.ContainsKey(id));
+        return Task.FromResult(this.EasyStore.Entities.ContainsKey(id));
     }
 
     /// <inheritdoc/>
@@ -74,7 +77,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (this.easyStore.Entities.TryGetValue(id, out var entity))
+        if (this.EasyStore.Entities.TryGetValue(id, out var entity))
         {
             return Task.FromResult(entity);
         }
@@ -87,7 +90,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (this.easyStore.Entities.TryGetValue(id, out var entity))
+        if (this.EasyStore.Entities.TryGetValue(id, out var entity))
         {
             return Task.FromResult<TEntity?>(entity);
         }
@@ -104,7 +107,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
 
         foreach (var id in ids)
         {
-            if (this.easyStore.Entities.TryGetValue(id, out var entity))
+            if (this.EasyStore.Entities.TryGetValue(id, out var entity))
             {
                 result.Add(entity);
             }
@@ -119,7 +122,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
         cancellationToken.ThrowIfCancellationRequested();
 
         return PaginationQueryableHelper.PageAsync(
-            this.easyStore.Entities.Values.AsQueryable().OrderBy(x => x.ID),
+            this.EasyStore.Entities.Values.AsQueryable().OrderBy(x => x.ID),
             pageQuery,
             static (q, _) => Task.FromResult(q.ToList()),
             static (q, _) => Task.FromResult(q.LongCount()),
@@ -131,7 +134,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        _ = this.easyStore.Entities.TryRemove(entity.ID, out _);
+        _ = this.EasyStore.Entities.TryRemove(entity.ID, out _);
 
         return Task.CompletedTask;
     }
@@ -149,7 +152,7 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return this.easyStore.Entities.Values.ToAsyncEnumerable();
+        return this.EasyStore.Entities.Values.ToAsyncEnumerable();
     }
 
     /// <inheritdoc/>
@@ -157,8 +160,8 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (this.easyStore.Entities.TryGetValue(entity.ID, out var oldEntity)
-            && this.easyStore.Entities.TryUpdate(entity.ID, entity, oldEntity))
+        if (this.EasyStore.Entities.TryGetValue(entity.ID, out var oldEntity)
+            && this.EasyStore.Entities.TryUpdate(entity.ID, entity, oldEntity))
         {
             return Task.CompletedTask;
         }
