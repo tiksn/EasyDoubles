@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNext" Version="5.20.0" />
+    <PackageReference Include="DotNext" Version="5.21.0" />
     <PackageReference Include="TIKSN-Framework" Version="5.4.4" />
   </ItemGroup>
 
