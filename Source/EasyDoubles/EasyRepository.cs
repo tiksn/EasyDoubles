@@ -86,16 +86,18 @@ public class EasyRepository<TEntity, TIdentity> : IEasyRepository<TEntity, TIden
     }
 
     /// <inheritdoc/>
-    public async Task<TEntity?> GetOrDefaultAsync(TIdentity id, CancellationToken cancellationToken)
+    public Task<TEntity?> GetOrDefaultAsync(TIdentity id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         if (this.EasyStore.Entities.TryGetValue(id, out var entity))
         {
-            return entity;
+#pragma warning disable IDE0001 // Simplify Names
+            return Task.FromResult<TEntity?>(entity);
+#pragma warning restore IDE0001 // Simplify Names
         }
 
-        return default;
+        return Task.FromResult<TEntity?>(default);
     }
 
     /// <inheritdoc/>
