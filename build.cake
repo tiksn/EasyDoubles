@@ -19,7 +19,12 @@ Task("Restore")
     .IsDependentOn("Clean")
     .Does(() =>
     {
-        DotNetRestore();
+        DotNetRestore(
+            ".",
+            new DotNetRestoreSettings()
+            {
+                Verbosity = DotNetVerbosity.Diagnostic,
+            });
     });
 
 Task("Build")
@@ -33,6 +38,7 @@ Task("Build")
             {
                 Configuration = configuration,
                 NoRestore = true,
+                Verbosity = DotNetVerbosity.Diagnostic,
             });
     });
 
@@ -57,6 +63,7 @@ Task("Test")
                     NoBuild = true,
                     NoRestore = true,
                     ResultsDirectory = artefactsDirectory,
+                    Verbosity = DotNetVerbosity.Diagnostic,
                 });
         });
 
@@ -77,6 +84,7 @@ Task("Pack")
                 NoBuild = true,
                 NoRestore = true,
                 OutputDirectory = artefactsDirectory,
+                Verbosity = DotNetVerbosity.Diagnostic,
             });
     });
 
