@@ -9,6 +9,7 @@ tasks:
       - dotnet format whitespace
       - dotnet format style --severity info
       - dotnet format analyzers --severity info
+      - dotnet outdated
       - dotnet cake --target=Build
       - dotnet cake --target=Test
       - dotnet cake --target=Pack
